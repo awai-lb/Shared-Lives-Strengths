@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>はぐくみクイック診断 - 3分で分かる共生活力チェック</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .slider-container {
+            position: relative;
+            margin: 20px 0;
+        }
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .progress-bar {
+            height: 6px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-seedling text-4xl mr-3"></i>
+                <h1 class="text-4xl font-bold">はぐくみクイック診断</h1>
+            </div>
+            <p class="text-xl opacity-90">たった3分で、あなたの共生活力を見える化</p>
+            <p class="text-sm mt-2 opacity-75">15問の簡単な質問に答えて、今すぐ結果を確認しましょう</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Start Screen -->
+        <div id="startScreen" class="text-center fade-in">
+            <div class="bg-white rounded-2xl card-shadow p-8 max-w-2xl mx-auto">
+                <div class="text-6xl mb-6">🌱</div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">共生活力って何？</h2>
+                <p class="text-gray-600 mb-6 leading-relaxed">
+                    障がいのある方も、ない方も、みんなが地域や職場で他の人と一緒に生きていく力のことです。
+                    「身体・健康」「居場所・環境」「関係・つながり」「学び・実践」「自己・意志」の5つの分野で、
+                    あなたの現在の状況を確認できます。
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <i class="fas fa-clock text-blue-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-blue-800">所要時間</h3>
+                        <p class="text-blue-600">約3分</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <i class="fas fa-chart-radar text-green-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-green-800">結果</h3>
+                        <p class="text-green-600">即座に表示</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <i class="fas fa-lightbulb text-purple-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-purple-800">アドバイス</h3>
+                        <p class="text-purple-600">個別提案</p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <i class="fas fa-hands-helping text-orange-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-orange-800">支援</h3>
+                        <p class="text-orange-600">専門家に相談</p>
+                    </div>
+                </div>
+                <button onclick="startAssessment()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-4 px-8 rounded-full text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 pulse-animation">
+                    <i class="fas fa-play mr-2"></i>診断を始める
+                </button>
+            </div>
+        </div>
+
+        <!-- Assessment Screen -->
+        <div id="assessmentScreen" class="hidden">
+            <!-- Progress Bar -->
+            <div class="bg-white rounded-2xl card-shadow p-6 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">質問 <span id="currentQuestion">1</span> / 15</h2>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-clock mr-1"></i>
+                        残り時間: <span id="timeRemaining">3:00</span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="progress-bar w-0 h-2 rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-2xl card-shadow p-8 fade-in">
+                <div class="mb-6">
+                    <div class="flex items-center mb-4">
+                        <div id="questionIcon" class="text-3xl mr-3">💪</div>
+                        <div>
+                            <h3 id="questionCategory" class="text-lg font-semibold text-gray-800">身体・健康</h3>
+                            <p id="questionSubCategory" class="text-sm text-gray-600">時間の使い方</p>
+                        </div>
+                    </div>
+                    <h2 id="questionText" class="text-2xl font-bold text-gray-800 mb-6">
+                        体調や健康のために、時間を使えていますか？
+                    </h2>
+                </div>
+
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" class="slider" id="answerSlider">
+                    <div class="flex justify-between text-sm text-gray-600 mt-2">
+                        <span>全くできていない</span>
+                        <span>あまりできていない</span>
+                        <span>どちらとも言えない</span>
+                        <span>だいたいできている</span>
+                        <span>しっかりできている</span>
+                    </div>
+                    <div class="text-center mt-4">
+                        <span class="text-2xl font-bold text-blue-600" id="sliderValue">3</span>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <button onclick="nextQuestion()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300">
+                        <span id="nextButtonText">次の質問</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="hidden">
+            <div class="bg-white rounded-2xl card-shadow p-8 mb-8">
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">診断完了！</h2>
+                    <p class="text-gray-600">あなたの共生活力の結果をお見せします</p>
+                </div>
+
+                <!-- Radar Chart -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">
+                        <i class="fas fa-chart-radar mr-2"></i>共生活力レーダーチャート
+                    </h3>
+                    <div class="max-w-lg mx-auto">
+                        <canvas id="radarChart" style="height: 400px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Scores -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-red-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-heart text-red-600 text-2xl mb-2"></i>
+                        <h4 class="font-semibold text-red-800">身体・健康</h4>
+                        <p class="text-2xl font-bold text-red-600" id="healthScore">-</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-home text-green-600 text-2xl mb-2"></i>
+                        <h4 class="font-semibold text-green-800">居場所・環境</h4>
+                        <p class="text-2xl font-bold text-green-600" id="environmentScore">-</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-users text-blue-600 text-2xl mb-2"></i>
+                        <h4 class="font-semibold text-blue-800">関係・つながり</h4>
+                        <p class="text-2xl font-bold text-blue-600" id="relationshipScore">-</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-graduation-cap text-purple-600 text-2xl mb-2"></i>
+                        <h4 class="font-semibold text-purple-800">学び・実践</h4>
+                        <p class="text-2xl font-bold text-purple-600" id="learningScore">-</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-user text-yellow-600 text-2xl mb-2"></i>
+                        <h4 class="font-semibold text-yellow-800">自己・意志</h4>
+                        <p class="text-2xl font-bold text-yellow-600" id="selfScore">-</p>
+                    </div>
+                    <div class="bg-pink-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-smile text-pink-600 text-2xl mb-2"></i>
+                        <h4 class="font-semibold text-pink-800">幸福感</h4>
+                        <p class="text-2xl font-bold text-pink-600" id="happinessScore">-</p>
+                    </div>
+                </div>
+
+                <!-- Personalized Advice -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-lightbulb mr-2"></i>あなたへのアドバイス
+                    </h3>
+                    <div id="personalizedAdvice" class="space-y-4">
+                        <!-- アドバイスが動的に挿入されます -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center space-y-4">
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="downloadPDF()" class="bg-green-600 text-white font-bold py-3 px-6 rounded-full hover:bg-green-700 transition-all duration-300">
+                            <i class="fas fa-download mr-2"></i>結果をPDF保存
+                        </button>
+                        <button onclick="shareResults()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-full hover:bg-blue-700 transition-all duration-300">
+                            <i class="fas fa-share-alt mr-2"></i>結果を共有
+                        </button>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <p class="text-orange-800 font-semibold mb-2">
+                            <i class="fas fa-star mr-2"></i>もっと詳しく知りたい方へ
+                        </p>
+                        <p class="text-orange-700 text-sm mb-4">
+                            より詳細な分析や専門家のアドバイスをご希望の場合は、プレミアム版をお試しください。
+                        </p>
+                        <div class="space-y-2">
+                            <button onclick="upgradeToPremium()" class="bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-2 px-6 rounded-full hover:from-orange-600 hover:to-red-700 transition-all duration-300">
+                                <i class="fas fa-crown mr-2"></i>プレミアム版を試す
+                            </button>
+                            <button onclick="connectToSupporter()" class="bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-2 px-6 rounded-full hover:from-purple-600 hover:to-pink-700 transition-all duration-300">
+                                <i class="fas fa-hands-helping mr-2"></i>支援者に相談する
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="restartAssessment()" class="text-gray-600 hover:text-gray-800 font-semibold">
+                        <i class="fas fa-redo mr-2"></i>もう一度診断する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-xl font-bold mb-4">はぐくみプラットフォーム</h3>
+            <p class="text-gray-400 mb-4">共生社会の実現を目指して、一人ひとりの成長を支援します</p>
+            <div class="flex justify-center space-x-6">
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fab fa-facebook text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fab fa-instagram text-xl"></i>
+                </a>
+            </div>
+            <p class="text-sm text-gray-500 mt-4">© 2024 はぐくみプラットフォーム. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // 診断データ
+        const questions = [
+            {
+                category: "身体・健康",
+                subCategory: "時間の使い方",
+                icon: "💪",
+                question: "体調や健康のために、時間を使えていますか？",
+                domain: "health"
+            },
+            {
+                category: "身体・健康",
+                subCategory: "人とのつながり",
+                icon: "💪",
+                question: "健康について安心して話せる人はいますか？",
+                domain: "health"
+            },
+            {
+                category: "身体・健康",
+                subCategory: "経済的な安定",
+                icon: "💪",
+                question: "病院や薬のことで、お金の心配はありますか？",
+                domain: "health",
+                reverse: true
+            },
+            {
+                category: "居場所・環境",
+                subCategory: "時間の使い方",
+                icon: "🏠",
+                question: "安心して過ごせる場所で、十分な時間を過ごせていますか？",
+                domain: "environment"
+            },
+            {
+                category: "居場所・環境",
+                subCategory: "人とのつながり",
+                icon: "🏠",
+                question: "あなたの居場所には、信頼できる人がいますか？",
+                domain: "environment"
+            },
+            {
+                category: "居場所・環境",
+                subCategory: "経済的な安定",
+                icon: "🏠",
+                question: "住まいや居場所で、お金の心配はありますか？",
+                domain: "environment",
+                reverse: true
+            },
+            {
+                category: "関係・つながり",
+                subCategory: "時間の使い方",
+                icon: "👥",
+                question: "人と一緒にいる時間は、あなたにとってちょうどいいですか？",
+                domain: "relationship"
+            },
+            {
+                category: "関係・つながり",
+                subCategory: "人とのつながり",
+                icon: "👥",
+                question: "信頼できる人がいますか？",
+                domain: "relationship"
+            },
+            {
+                category: "関係・つながり",
+                subCategory: "経済的な安定",
+                icon: "👥",
+                question: "人と一緒に過ごすためのお金は足りていますか？",
+                domain: "relationship"
+            },
+            {
+                category: "学び・実践",
+                subCategory: "時間の使い方",
+                icon: "📚",
+                question: "新しいことを学んだり挑戦したりする時間はありますか？",
+                domain: "learning"
+            },
+            {
+                category: "学び・実践",
+                subCategory: "人とのつながり",
+                icon: "📚",
+                question: "学びや挑戦を応援してくれる人はいますか？",
+                domain: "learning"
+            },
+            {
+                category: "学び・実践",
+                subCategory: "経済的な安定",
+                icon: "📚",
+                question: "学びたいことのために、お金の心配はありますか？",
+                domain: "learning",
+                reverse: true
+            },
+            {
+                category: "自己・意志",
+                subCategory: "時間の使い方",
+                icon: "🌟",
+                question: "自分らしく過ごすための時間はありますか？",
+                domain: "self"
+            },
+            {
+                category: "自己・意志",
+                subCategory: "人とのつながり",
+                icon: "🌟",
+                question: "あなたの意見や考えを尊重してくれる人はいますか？",
+                domain: "self"
+            },
+            {
+                category: "幸福感",
+                subCategory: "全体的な満足度",
+                icon: "😊",
+                question: "今のあなたの生活で、幸せだと感じることはありますか？",
+                domain: "happiness"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let answers = [];
+        let startTime;
+        let timerInterval;
+
+        // 診断開始
+        function startAssessment() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('assessmentScreen').classList.remove('hidden');
+            startTime = Date.now();
+            startTimer();
+            showQuestion();
+        }
+
+        // タイマー開始
+        function startTimer() {
+            const duration = 3 * 60 * 1000; // 3分
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, duration - elapsed);
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                document.getElementById('timeRemaining').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    completeAssessment();
+                }
+            }, 1000);
+        }
+
+        // 質問表示
+        function showQuestion() {
+            const q = questions[currentQuestionIndex];
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionIcon').textContent = q.icon;
+            document.getElementById('questionCategory').textContent = q.category;
+            document.getElementById('questionSubCategory').textContent = q.subCategory;
+            document.getElementById('questionText').textContent = q.question;
+            document.getElementById('progressBar').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+            document.getElementById('answerSlider').value = 3;
+            document.getElementById('sliderValue').textContent = 3;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                document.getElementById('nextButtonText').textContent = '結果を見る';
+            }
+        }
+
+        // スライダーの値更新
+        document.getElementById('answerSlider').addEventListener('input', function(e) {
+            document.getElementById('sliderValue').textContent = e.target.value;
+        });
+
+        // 次の質問
+        function nextQuestion() {
+            const answer = parseInt(document.getElementById('answerSlider').value);
+            const q = questions[currentQuestionIndex];
+            
+            // 逆転項目の処理
+            const processedAnswer = q.reverse ? (6 - answer) : answer;
+            
+            answers.push({
+                questionIndex: currentQuestionIndex,
+                answer: processedAnswer,
+                domain: q.domain,
+                originalAnswer: answer
+            });
+
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                completeAssessment();
+            }
+        }
+
+        // 診断完了
+        function completeAssessment() {
+            clearInterval(timerInterval);
+            document.getElementById('assessmentScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+            calculateAndShowResults();
+        }
+
+        // 結果計算と表示
+        function calculateAndShowResults() {
+            // 各領域のスコア計算
+            const scores = {
+                health: 0,
+                environment: 0,
+                relationship: 0,
+                learning: 0,
+                self: 0,
+                happiness: 0
+            };
+
+            const counts = {
+                health: 0,
+                environment: 0,
+                relationship: 0,
+                learning: 0,
+                self: 0,
+                happiness: 0
+            };
+
+            answers.forEach(answer => {
+                scores[answer.domain] += answer.answer;
+                counts[answer.domain]++;
+            });
+
+            // 平均スコア計算
+            const avgScores = {};
+            Object.keys(scores).forEach(domain => {
+                avgScores[domain] = counts[domain] > 0 ? (scores[domain] / counts[domain]).toFixed(1) : 0;
+            });
+
+            // スコア表示
+            document.getElementById('healthScore').textContent = avgScores.health;
+            document.getElementById('environmentScore').textContent = avgScores.environment;
+            document.getElementById('relationshipScore').textContent = avgScores.relationship;
+            document.getElementById('learningScore').textContent = avgScores.learning;
+            document.getElementById('selfScore').textContent = avgScores.self;
+            document.getElementById('happinessScore').textContent = avgScores.happiness;
+
+            // レーダーチャート作成
+            createRadarChart(avgScores);
+
+            // 個別アドバイス生成
+            generateAdvice(avgScores);
+        }
+
+        // レーダーチャート作成
+        function createRadarChart(scores) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['身体・健康', '居場所・環境', '関係・つながり', '学び・実践', '自己・意志', '幸福感'],
+                    datasets: [{
+                        label: '共生活力',
+                        data: [
+                            scores.health,
+                            scores.environment,
+                            scores.relationship,
+                            scores.learning,
+                            scores.self,
+                            scores.happiness
+                        ],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 5,
+                            ticks: {
+                                stepSize: 1,
+                                display: true,
+                                backdropColor: 'transparent'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // アドバイス生成
+        function generateAdvice(scores) {
+            const adviceContainer = document.getElementById('personalizedAdvice');
+            
+            // 最も低いスコアと高いスコアを特定
+            const scoreEntries = Object.entries(scores).map(([domain, score]) => ({
+                domain, 
+                score: parseFloat(score),
+                name: getDomainName(domain)
+            }));
+            
+            const sortedScores = scoreEntries.sort((a, b) => b.score - a.score);
+            const strongest = sortedScores[0];
+            const weakest = sortedScores[sortedScores.length - 1];
+            
+            const advice = [];
+            
+            // 強みの認識
+            if (strongest.score >= 4.0) {
+                advice.push({
+                    type: 'strength',
+                    title: `✨ 素晴らしい強み：${strongest.name}`,
+                    content: `${strongest.name}の分野でとても良い状態を保っています。この強みを活かして、他の分野での成長にも取り組んでみませんか？`
+                });
+            }
+            
+            // 改善提案
+            if (weakest.score < 3.0) {
+                advice.push({
+                    type: 'improvement',
+                    title: `🎯 成長のチャンス：${weakest.name}`,
+                    content: getSpecificAdvice(weakest.domain, weakest.score)
+                });
+            }
+            
+            // 全体的なアドバイス
+            const averageScore = scoreEntries.reduce((sum, item) => sum + item.score, 0) / scoreEntries.length;
+            
+            if (averageScore >= 4.0) {
+                advice.push({
+                    type: 'overall',
+                    title: '🌟 全体的な評価',
+                    content: 'とても良いバランスで共生活力を保っています。この状態を維持しながら、さらに成長できる分野を見つけてみましょう。'
+                });
+            } else if (averageScore >= 3.0) {
+                advice.push({
+                    type: 'overall',
+                    title: '📈 バランスの良い成長',
+                    content: '各分野でバランスよく成長しています。特に気になる分野があれば、そこに少し focus してみることをお勧めします。'
+                });
+            } else {
+                advice.push({
+                    type: 'overall',
+                    title: '🌱 成長の第一歩',
+                    content: 'まずは一つの分野から始めてみませんか？小さな変化から大きな成長につながります。支援者と一緒に取り組むことをお勧めします。'
+                });
+            }
+            
+            // 次のステップ
+            advice.push({
+                type: 'action',
+                title: '🚀 次のステップ',
+                content: 'より詳しい分析や具体的な行動計画については、プレミアム版をお試しいただくか、専門の支援者にご相談ください。'
+            });
+            
+            // HTMLに挿入
+            adviceContainer.innerHTML = advice.map(item => `
+                <div class="p-4 rounded-lg ${getAdviceColor(item.type)} border-l-4 ${getAdviceBorder(item.type)}">
+                    <h4 class="font-bold text-gray-800 mb-2">${item.title}</h4>
+                    <p class="text-gray-700">${item.content}</p>
+                </div>
+            `).join('');
+        }
+
+        // 領域名の取得
+        function getDomainName(domain) {
+            const names = {
+                health: '身体・健康',
+                environment: '居場所・環境',
+                relationship: '関係・つながり',
+                learning: '学び・実践',
+                self: '自己・意志',
+                happiness: '幸福感'
+            };
+            return names[domain] || domain;
+        }
+
+        // 具体的なアドバイス
+        function getSpecificAdvice(domain, score) {
+            const advice = {
+                health: '健康管理に関する時間の確保や、相談できる人を見つけることから始めてみましょう。地域の保健サービスの利用もお勧めします。',
+                environment: '安心できる場所を見つけたり、住環境を改善したりすることを考えてみましょう。地域の支援制度の利用も検討してください。',
+                relationship: '信頼できる人との関係を築くことから始めてみましょう。地域のサークルや支援グループへの参加もお勧めします。',
+                learning: '興味のある分野から少しずつ学習を始めてみましょう。図書館や公民館の講座の利用も良いでしょう。',
+                self: '自分の時間を作ることや、意見を言える環境を見つけることから始めてみましょう。',
+                happiness: '日常の小さな喜びを見つけることから始めてみましょう。好きなことに時間を使うことも大切です。'
+            };
+            return advice[domain] || '専門家に相談してみることをお勧めします。';
+        }
+
+        // アドバイスの色分け
+        function getAdviceColor(type) {
+            const colors = {
+                strength: 'bg-green-50',
+                improvement: 'bg-blue-50',
+                overall: 'bg-purple-50',
+                action: 'bg-orange-50'
+            };
+            return colors[type] || 'bg-gray-50';
+        }
+
+        function getAdviceBorder(type) {
+            const borders = {
+                strength: 'border-green-500',
+                improvement: 'border-blue-500',
+                overall: 'border-purple-500',
+                action: 'border-orange-500'
+            };
+            return borders[type] || 'border-gray-500';
+        }
+
+        // PDF保存
+        function downloadPDF() {
+            alert('PDF保存機能は開発中です。現在はスクリーンショットを保存してください。');
+        }
+
+        // 結果共有
+        function shareResults() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'はぐくみクイック診断結果',
+                    text: '共生活力診断を受けました！',
+                    url: window.location.href
+                });
+            } else {
+                alert('この機能はモダンブラウザでのみ利用可能です。');
+            }
+        }
+
+        // プレミアム版へのアップグレード
+        function upgradeToPremium() {
+            alert('プレミアム版では、より詳細な分析と専門家のアドバイスが受けられます。開発中の機能です。');
+        }
+
+        // 支援者との接続
+        function connectToSupporter() {
+            alert('支援者マッチング機能は開発中です。お待ちください。');
+        }
+
+        // 診断再開始
+        function restartAssessment() {
+            currentQuestionIndex = 0;
+            answers = [];
+            clearInterval(timerInterval);
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDg9ypiUo4bTF39qe4dLDjl8PIC9xECu%2FgvA3nNHrvryNpGMB92QfC1KTCB5VC8WWYfLZzyHN5vZvmYc%2BHfy5HvxYhoL8LTFOsqT38LWnMhM1xNw%2Brserj1sgUvcypxfXmXz8lvW3CKNSRc%2Bwp8Bh3N%2BkAffoq8o0Sl363RGk7OQnzcAvzvnIrwBsnX%2FQpMPDDa1HgeQmKTDACoNHRoEniz%2Bkedd%2FRnlDMhz5GGqYoNR5A75vmnUDbljMw96UNlW3LWUHiOj3VBJOdwVW7Y02ylSaXryn4o45a0mIEKcILuHYYzneX3bUWKbi7A8ERQz0%2FMFlVAY7njG4pj1b29WE0jKf6GiWrLx4wGHxdmFwXhVA8lC%2ByQLOu%2FE3eB48FcBiSwwdy33%2BeV3OhPLuQhDRSY%2BpzGglwHVBl9BIAkwGxIS4eQzZNBFp%2FN0PSp%2FCKdoUsXyXcE8eJOOtZbNQgC8vTnYGVdQmsTsiPIQdvtzHOhointUxm4q5TyVERhtnLA68dA%3D%3D";
+        window.__genspark_locale = "ja-JP";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDg9ypiUo4bTF39qe4dLDjl8PIC9xECu/gvA3nNHrvryNpGMB92QfC1KTCB5VC8WWYfLZzyHN5vZvmYc+Hfy5HvxYhoL8LTFOsqT38LWnMhM1xNw+rserj1sgUvcypxfXmXz8lvW3CKNSRc+wp8Bh3N+kAffoq8o0Sl363RGk7OQnzcAvzvnIrwBsnX/QpMPDDa1HgeQmKTDACoNHRoEniz+kedd/RnlDMhz5GGqYoNR5A75vmnUDbljMw96UNlW3LWUHiOj3VBJOdwVW7Y02ylSaXryn4o45a0mIEKcILuHYYzneX3bUWKbi7A8ERQz0/MFlVAY7njG4pj1b29WE0jKf6GiWrLx4wGHxdmFwXhVA8lC+yQLOu/E3eB48FcBiSwwdy33+eV3OhPLuQhDRSY+pzGglwHVBl9BIAkwGxIS4eQzZNBFp/N0PSp/CKdoUsXyXcE8eJOOtZbNQgC8vTnYGVdQmsTsiPIQdvtzHOhointUxm4q5TyVERhtnLA68dA==";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    
